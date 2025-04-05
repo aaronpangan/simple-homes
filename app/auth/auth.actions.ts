@@ -17,6 +17,11 @@ export async function signOut() {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Error signing out:", error);
+  } else {
+    redirect("/");
+  }
 }
 
 export async function googleAuth() {
@@ -35,4 +40,11 @@ export async function googleAuth() {
   if (data?.url) {
     redirect(data.url);
   }
+}
+
+export async function getUser() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
+
+  return data.user;
 }

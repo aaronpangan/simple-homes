@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { auth } from "../../app/auth/auth.actions";
+import { auth, googleAuth } from "../../app/auth/auth.actions";
 import { Button } from "../ui/button";
 import {
   Form,
@@ -90,7 +90,11 @@ export default function AuthDialogForm() {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" className="h-12 w-full text-lg">
+            <Button
+              onClick={googleAuth}
+              variant="outline"
+              className="h-12 w-full text-lg"
+            >
               <img
                 src="/google-icon.svg"
                 alt="Google Icon"
