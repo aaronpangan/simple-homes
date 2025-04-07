@@ -7,6 +7,10 @@ import ProfileDialogForm from "./ProfileDialogForm";
 export default function ProfileDialog() {
   const [open, setOpen] = useState(true);
 
+  function closeDialog() {
+    setOpen(false);
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -15,7 +19,7 @@ export default function ProfileDialog() {
             Complete Your Profile
           </DialogTitle>
         </DialogHeader>
-        <ProfileDialogForm />
+        <ProfileDialogForm closeDialog={closeDialog} />
       </DialogContent>
     </Dialog>
   );

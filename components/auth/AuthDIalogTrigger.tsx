@@ -9,7 +9,7 @@ export default function AuthDialogTrigger() {
     <AuthDialog
       trigger={
         <DialogTrigger asChild>
-          <Button className="text-sm font-bold">Join / Sign in</Button>
+          <Button  className="text-sm font-bold">Join / Sign in</Button>
         </DialogTrigger>
       }
     ></AuthDialog>

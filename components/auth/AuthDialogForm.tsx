@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { auth, googleAuth } from "../../app/auth/auth.actions";
 import { Button } from "../ui/button";
@@ -25,7 +27,14 @@ const profileFormSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
-export default function AuthDialogForm() {
+type AuthDialogFormProps = {
+  closeDialog?: () => void;
+};
+
+export default function AuthDialogForm({ closeDialog }: AuthDialogFormProps) {
+  const [emailLoading, setEmailLoading] = React.useState(false);
+  const [googleLoading, setGoogleLoading] = React.useState(false);
+
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -34,10 +43,29 @@ export default function AuthDialogForm() {
   });
 
   async function onSubmit(values: z.infer<typeof profileFormSchema>) {
-    const formData = new FormData();
-    formData.append("email", values.email);
+    try {
+      setEmailLoading(true);
+      const formData = new FormData();
+      formData.append("email", values.email);
+      await auth(formData);
+    } catch (error) {
+      console.error("Email authentication error:", error);
+    } finally {
+      setEmailLoading(false);
+      closeDialog?.();
+      toast.success("Check your email for the authentication link!");
+    }
+  }
 
-    await auth(formData);
+  async function handleGoogleAuth() {
+    try {
+      setGoogleLoading(true);
+      await googleAuth();
+    } catch (error) {
+      console.error("Google authentication error:", error);
+    } finally {
+      setGoogleLoading(false);
+    }
   }
 
   return (
@@ -47,7 +75,6 @@ export default function AuthDialogForm() {
           className="flex flex-col gap-6"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
@@ -67,8 +94,11 @@ export default function AuthDialogForm() {
             )}
           />
 
-          {/* Submit Button */}
-          <Button type="submit" className="text-md h-12 font-bold">
+          <Button
+            type="submit"
+            className="text-md h-12 font-bold"
+            loading={emailLoading}
+          >
             Continue with email
           </Button>
         </form>
@@ -86,14 +116,14 @@ export default function AuthDialogForm() {
         </div>
       </div>
 
-      {/* Google Signup Button */}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              onClick={googleAuth}
+              onClick={handleGoogleAuth}
               variant="outline"
               className="h-12 w-full text-lg"
+              loading={googleLoading}
             >
               <img
                 src="/google-icon.svg"

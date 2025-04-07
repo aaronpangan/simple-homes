@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { addUserProfile } from "../../app/profile/profile.actions";
 import { Button } from "../ui/button";
@@ -20,7 +22,15 @@ const profileFormSchema = z.object({
   address: z.string().min(5, "Address must be at least 5 characters"),
 });
 
-export default function ProfileDialogForm() {
+type ProfileDialogFormProps = {
+  closeDialog?: () => void;
+};
+
+export default function ProfileDialogForm({
+  closeDialog,
+}: ProfileDialogFormProps) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -30,7 +40,16 @@ export default function ProfileDialogForm() {
   });
 
   async function onSubmit(values: z.infer<typeof profileFormSchema>) {
-    const result = await addUserProfile(values.name, values.address);
+    try {
+      setIsSubmitting(true);
+      const result = await addUserProfile(values.name, values.address);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    } finally {
+      closeDialog?.();
+      setIsSubmitting(false);
+      toast.success("Profile has been successfully added");
+    }
   }
 
   return (
@@ -79,7 +98,11 @@ export default function ProfileDialogForm() {
           />
 
           {/* Submit Button */}
-          <Button type="submit" className="text-md h-12 font-bold">
+          <Button
+            type="submit"
+            className="text-md h-12 font-bold"
+            loading={isSubmitting}
+          >
             Save profile
           </Button>
         </form>
